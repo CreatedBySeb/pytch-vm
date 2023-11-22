@@ -173,6 +173,19 @@ var $builtinmodule = function (name) {
         `(SOUND) Play a sound from an object; maybe wait`,
     );
 
+    mod._microbit_send = skulpt_function(
+        (py_command, py_args) => {
+            const [command, args] = [py_command, py_args].map(Sk.ffi.remapToJs);
+            if (typeof command !== "string") throw new Sk.builtin.TypeError("microbit_send() must be given a command string");
+            if (!(args instanceof Array) || args.some((arg) => typeof arg !== "string")) {
+                throw new Sk.builtin.TypeError("microbit_send() must be given an array of string args");
+            }
+
+            return new_pytch_suspension("microbit-send", { command, args });
+        },
+        `(MICROBIT) Send a command to the micro:bit`,
+    );
+
     mod._get_actor_sound_mix_bus_gain = skulpt_function(
         (py_obj) => {
             const mix_bus_name = py_obj.$pytchActorInstance.info_label;

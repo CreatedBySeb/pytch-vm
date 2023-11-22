@@ -258,6 +258,7 @@ var $builtinmodule = function (name) {
             this.event_handlers = {
                 green_flag: new EventHandlerGroup(),
                 keypress: new Map(),
+                microbit: new Map(),
                 message: new Map(),
             };
 
@@ -455,6 +456,12 @@ var $builtinmodule = function (name) {
                 key_handlers.get(event_data).push(handler);
                 break;
 
+            case "microbit":
+                let microbit_handlers = this.event_handlers.microbit;
+                if (!microbit_handlers.has(event_data)) microbit_handlers.set(event_data, new EventHandlerGroup());
+                microbit_handlers.get(event_data).push(handler);
+                break;
+
             case "clone":
                 this.clone_handlers.push(handler_py_func);
                 break;
@@ -551,6 +558,12 @@ var $builtinmodule = function (name) {
 
         create_threads_for_keypress(thread_group, keyname) {
             let event_handler_group = (this.event_handlers.keypress.get(keyname)
+                                       || EventHandlerGroup.empty);
+            event_handler_group.create_threads(thread_group, this.parent_project);
+        }
+
+        create_threads_for_microbit(thread_group, event_name) {
+            let event_handler_group = (this.event_handlers.microbit.get(event_name)
                                        || EventHandlerGroup.empty);
             event_handler_group.create_threads(thread_group, this.parent_project);
         }
@@ -990,6 +1003,9 @@ var $builtinmodule = function (name) {
             case Thread.State.AWAITING_ANSWER_TO_QUESTION:
                 return this.sleeping_on.is_answered();
 
+            case Thread.State.AWAITING_MICROBIT:
+                return this.sleeping_on != null;
+
             case Thread.State.ZOMBIE:
                 return false;
 
@@ -1015,6 +1031,17 @@ var $builtinmodule = function (name) {
                 // Use the question's answer as the return value from the
                 // suspension, thereby giving it back to Python.
                 this.skulpt_susp.data.set_success(this.sleeping_on.value);
+                break;
+            
+            case Thread.State.AWAITING_MICROBIT:
+                const result = this.sleeping_on;
+
+                if (result instanceof Error) {
+                    this.skulpt_susp.data.set_failure(Sk.ffi.remapToPy(result));
+                } else {
+                    this.skulpt_susp.data.set_success(Sk.ffi.remapToPy(result));
+                }
+                
                 break;
 
             default:
@@ -1074,6 +1101,22 @@ var $builtinmodule = function (name) {
                     this.state = Thread.State.AWAITING_SOUND_COMPLETION;
                     this.sleeping_on = performance;
                 }
+
+                return [];
+            }
+
+            case "microbit-send": {
+                const { command, args } = syscall_args,
+                    microbit = Sk.pytch.get_active_device();
+
+                if (!microbit) throw new Sk.builtin.SystemError("No micro:bit device is connected");
+                
+                this.state = Thread.State.AWAITING_MICROBIT;
+                this.sleeping_on = null;
+
+                microbit.send(command, args).then((result) => {
+                    this.sleeping_on = result;
+                });
 
                 return [];
             }
@@ -1292,6 +1335,12 @@ var $builtinmodule = function (name) {
         // given.  A reference to the UserQuestion is stored in the Thread
         // instance's "sleeping_on" property.
         AWAITING_ANSWER_TO_QUESTION: "awaiting-answer-to-question",
+
+        // AWAITING_MICROBIT: The thread has will pause execution until the
+        // micro:bit command has completed. A reference to the promise returned
+        // is wrapped and stored in the Thread instance's "sleeping_on" property.
+        // The value returned by the Promise indicates if an error has occurred.
+        AWAITING_MICROBIT: "awaiting-microbit",
 
         // ZOMBIE: The thread has terminated but has not yet been cleared from
         // the list of live threads.
@@ -1819,6 +1868,18 @@ var $builtinmodule = function (name) {
             });
         }
 
+        launch_microbit_handlers() {
+            const microbit = Sk.pytch.get_active_device();
+            if (!microbit) return;
+
+            let new_events = microbit.drainNewEvents();
+            new_events.forEach(event_name => {
+                let thread_group = new ThreadGroup(`microbit "${event_name}"`);
+                this.actors.forEach(a => a.create_threads_for_microbit(thread_group, event_name));
+                this.thread_groups.push(thread_group);
+            });
+        }
+
         // Check for the first shown sprite instance whose bounding box contains the
         // given point (stage_x, stage_y).  If one is found, launch any click
         // handlers it has.  (If no shown true sprite is found, the sole instance of
@@ -1852,6 +1913,7 @@ var $builtinmodule = function (name) {
 
         one_frame() {
             this.launch_keypress_handlers();
+            this.launch_microbit_handlers();
             this.launch_mouse_click_handlers();
 
             this.thread_groups.forEach(tg => tg.maybe_cull_threads());
