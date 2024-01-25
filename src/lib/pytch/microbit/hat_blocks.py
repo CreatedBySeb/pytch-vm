@@ -25,7 +25,7 @@ class when_gesture_performed:
 
     def __call__(self, fun):
         return _append_handler(fun, 'microbit', "gesture:" + self.gesture)
-    
+ 
 class when_pin_high:
     "(PIN) Run your method when you PIN is high on the micro:bit"
     def __init__(self, pin):

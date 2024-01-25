@@ -1037,7 +1037,8 @@ var $builtinmodule = function (name) {
                 const result = this.sleeping_on;
 
                 if (result instanceof Error) {
-                    this.skulpt_susp.data.set_failure(Sk.ffi.remapToPy(result));
+                    console.error(result);
+                    this.skulpt_susp.data.set_failure(new Sk.builtin.ExternalError(result.message + " (from micro:bit)"));
                 } else {
                     this.skulpt_susp.data.set_success(Sk.ffi.remapToPy(result));
                 }

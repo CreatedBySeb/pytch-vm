@@ -5,7 +5,10 @@ from ..syscalls import (
     _microbit_send,
 )
 
+BRIGHTNESS_RANGE = range(0, 10)
+IMAGE_COORD_RANGE = range(0, 5)
 IMAGE_REGEX = re.compile(r"(\d{5}:){4}\d{5}")
+NOTE_REGEX = re.compile(r"[a-gA-GrR](b|#)?\d?(:\d)?")
 NUMERIC_VARS = ("temp", "accel", "light")
 VALID_VARS = ("buttons", "temp", "accel", "gesture", "light", "pins")
 
@@ -22,6 +25,37 @@ def _get_variable(name: str) -> list:
     return values
 
 Acceleration = namedtuple("Acceleration", ["x", "y", "z"])
+
+class Image:
+    def __init__(self, *rows):
+        if len(rows) != 5:
+            raise ValueError("You must provide 5 rows for an image")
+
+        if not all(len(row) == 5 for row in rows):
+            raise ValueError("All image rows must have exactly 5 values")
+
+        if not all(
+            all(pixel in BRIGHTNESS_RANGE for pixel in row)
+            for row in rows
+        ):
+            raise ValueError("All pixel values must be between 0 and 9")
+
+        self._rows = rows
+
+    def __getitem__(self, key):
+        return self._rows[key]
+
+    def __setitem__(self, key, row):
+        if len(row) != 5:
+            raise ValueError("Image row must have exactly 5 values")
+
+        if not all(pixel in BRIGHTNESS_RANGE for pixel in row):
+            raise ValueError("Pixel values must be between 0 and 9")
+
+        self._rows[key] = row
+
+    def __str__(self):
+        return ":".join("".join([str(pixel) for pixel in row]) for row in self._rows)
 
 class Device:
     @property
@@ -55,6 +89,13 @@ def clear_display():
     """() Clear the micro:bit's display"""
     _microbit_send("clear", [])
 
+def play_music(notes: list, tempo: int = 120, loop: bool = False):
+    """(NOTES, TEMPO, LOOP) Play NOTES at TEMPO beats per minute, continuously if LOOP is True, TEMPO defaults to 120, LOOP defaults to False"""
+    if not all(NOTE_REGEX.match(note) for note in notes):
+        raise ValueError("All notes must follow the format <note>(octave)(:hold)")
+
+    _microbit_send("play_music", [str(tempo), " ".join(notes), str(loop)])
+
 def scroll_message(message: str):
     """(MESSAGE) Scroll MESSAGE across the micro:bit's display"""
     _microbit_send("scroll", [message])
@@ -68,20 +109,24 @@ def set_pin(pin: int, value: bool):
 
 def set_pixel(x: int, y: int, brightness: int = 9):
     """(X, Y, BRIGHTNESS) Set pixel at X and Y to BRIGHTNESS level, between 1 and 9"""
-    if x not in range(0, 5):
+    if x not in IMAGE_COORD_RANGE:
         raise ValueError("x value must be between 0 and 4")
-    if y not in range(0, 5):
+    if y not in IMAGE_COORD_RANGE:
         raise ValueError("y value must be between 0 and 4")
-    if brightness not in range(0, 10):
+    if brightness not in BRIGHTNESS_RANGE:
         raise ValueError("brightness value must be between 0 and 9")
 
     _microbit_send("pixel", [str(arg) for arg in [x, y, brightness]])
 
-def show_image(image: str):
+def show_image(image):
     """(IMAGE) Show IMAGE on the micro:bit's display"""
-    if not IMAGE_REGEX.match(image):
+    if isinstance(image, Image):
+        image = str(image)
+    elif not isinstance(image, str):
+        raise ValueError("Image value must be an Image object or string")
+    elif not IMAGE_REGEX.match(image):
         raise ValueError(
-            "image must be of the form XXXXX:XXXXX:XXXXX:XXXXX:XXXXX, "
+            "Image string must be of the form XXXXX:XXXXX:XXXXX:XXXXX:XXXXX, "
             "where X is a number between 1 and 9"
         )
 
@@ -90,3 +135,7 @@ def show_image(image: str):
 def show_text(text: str):
     """(TEXT) Show TEXT on the micro:bit's display, character by character"""
     _microbit_send("show_text", [text])
+
+def stop_music():
+    """() Stops any currently playing music"""
+    _microbit_send("stop_music", [])

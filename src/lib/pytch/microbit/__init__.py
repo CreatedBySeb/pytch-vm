@@ -1,10 +1,13 @@
 from .device import (
-	device,
     clear_display,
+	device,
+    Image,
+    play_music,
 	scroll_message,
 	set_pixel,
 	show_image,
 	show_text,
+    stop_music,
 )
 
 from .hat_blocks import (
