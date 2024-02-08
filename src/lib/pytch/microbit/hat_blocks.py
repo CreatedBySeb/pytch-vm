@@ -3,7 +3,7 @@ from ..hat_blocks import _append_handler
 class when_button_pressed:
     "(BUTTON) Run your method when you press BUTTON on the micro:bit"
     def __init__(self, button):
-        microbit_buttons = ("a", "b")
+        microbit_buttons = ("a", "b", "logo")
 
         if button not in microbit_buttons:
             raise TypeError("Button '" + button + "' is not one of the supported buttons: " + ", ".join(microbit_buttons))
@@ -25,7 +25,7 @@ class when_gesture_performed:
 
     def __call__(self, fun):
         return _append_handler(fun, 'microbit', "gesture:" + self.gesture)
- 
+
 class when_pin_high:
     "(PIN) Run your method when you PIN is high on the micro:bit"
     def __init__(self, pin):

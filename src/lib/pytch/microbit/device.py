@@ -24,7 +24,15 @@ def _get_variable(name: str) -> list:
 
     return values
 
-Acceleration = namedtuple("Acceleration", ["x", "y", "z"])
+class Acceleration(namedtuple("Acceleration", ["x", "y", "z"])):
+    @property
+    def magnitude(self) -> float:
+        return (self.x ** 2 + self.y ** 2 + self.z ** 2) ** (1/2)
+
+class Buttons(namedtuple("Buttons", ["a", "b", "logo"])):
+    @property
+    def any(self) -> bool:
+        return self.a or self.b or self.logo
 
 class Image:
     def __init__(self, *rows):
@@ -64,8 +72,7 @@ class Device:
 
     @property
     def buttons(self):
-        [a, b] = _get_variable("buttons")
-        return {"a": a, "b": b}
+        return Buttons(*_get_variable("buttons"))
 
     @property
     def gesture(self):
