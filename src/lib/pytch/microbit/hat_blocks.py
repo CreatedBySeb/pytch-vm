@@ -38,3 +38,16 @@ class when_pin_high:
 
     def __call__(self, fun):
         return _append_handler(fun, 'microbit', "pin_high:" + self.pin)
+
+class when_sound_heard:
+    "(LEVEL) Run your method when a LEVEL sound is head"
+    def __init__(self, level):
+        noise_levels = ("quiet", "loud")
+
+        if level not in noise_levels:
+            raise TypeError("Level '" + level + "' is not one of the supported levels: " + ", ".join(noise_levels))
+
+        self.level = level
+
+    def __call__(self, fun):
+        return _append_handler(fun, 'microbit', "mic:" + self.level)

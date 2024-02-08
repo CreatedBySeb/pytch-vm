@@ -9,8 +9,12 @@ BRIGHTNESS_RANGE = range(0, 10)
 IMAGE_COORD_RANGE = range(0, 5)
 IMAGE_REGEX = re.compile(r"(\d{5}:){4}\d{5}")
 NOTE_REGEX = re.compile(r"[a-gA-GrR](b|#)?\d?(:\d)?")
-NUMERIC_VARS = ("temp", "accel", "light")
-VALID_VARS = ("buttons", "temp", "accel", "gesture", "light", "pins")
+BOOL_VARS = ("buttons")
+NUMERIC_VARS = ("temp", "accel", "light", "pins", "sound")
+VALID_VARS = ("buttons", "temp", "accel", "gesture", "light", "pins", "sound")
+
+LOUD = "loud"
+QUIET = "quiet"
 
 
 def _get_variable(name: str) -> list:
@@ -19,6 +23,8 @@ def _get_variable(name: str) -> list:
 
     values = _microbit_send("var", [name])
 
+    if name in BOOL_VARS:
+        return [value == "True" for value in values]
     if name in NUMERIC_VARS:
         return [float(value) for value in values]
 
@@ -81,6 +87,10 @@ class Device:
     @property
     def light(self):
         return _get_variable("light")[0]
+
+    @property
+    def sound(self):
+        return _get_variable("sound")[0]
 
     @property
     def pins(self):
