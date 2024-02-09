@@ -2,10 +2,12 @@ from collections import namedtuple
 import re
 
 from ..syscalls import (
-    _microbit_send,
+	_microbit_send,
 )
 
 BRIGHTNESS_RANGE = range(0, 10)
+RADIO_CH_RANGE = range(0, 84)
+RADIO_GROUP_RANGE = range(0, 256)
 IMAGE_COORD_RANGE = range(0, 5)
 IMAGE_REGEX = re.compile(r"(\d{5}:){4}\d{5}")
 NOTE_REGEX = re.compile(r"[a-gA-GrR](b|#)?\d?(:\d)?")
@@ -15,7 +17,6 @@ VALID_VARS = ("buttons", "temp", "accel", "gesture", "light", "pins", "sound")
 
 LOUD = "loud"
 QUIET = "quiet"
-
 
 def _get_variable(name: str) -> list:
     if name not in VALID_VARS:
@@ -106,6 +107,16 @@ def clear_display():
     """() Clear the micro:bit's display"""
     _microbit_send("clear", [])
 
+def enable_radio(channel: int = 7, group: int = 0):
+    """(CHANNEL) Enable radio on CHANNEL for GROUP, defaults to 7 and 0"""
+    if channel not in RADIO_CH_RANGE:
+        raise ValueError("Radio channel must be between 0 and 83")
+
+    if group not in RADIO_GROUP_RANGE:
+        raise ValueError("Radio group must be between 0 and 255")
+
+    _microbit_send("radio", [str(arg) for arg in [channel, group]])
+
 def play_music(notes: list, tempo: int = 120, loop: bool = False):
     """(NOTES, TEMPO, LOOP) Play NOTES at TEMPO beats per minute, continuously if LOOP is True, TEMPO defaults to 120, LOOP defaults to False"""
     if not all(NOTE_REGEX.match(note) for note in notes):
@@ -116,6 +127,13 @@ def play_music(notes: list, tempo: int = 120, loop: bool = False):
 def scroll_message(message: str):
     """(MESSAGE) Scroll MESSAGE across the micro:bit's display"""
     _microbit_send("scroll", [message])
+
+def send_message(message: str):
+    """(MESSAGE) Send MESSAGE using the micro:bit's radio to the configured channel"""
+    if len(message) > 32:
+        raise ValueError("Radio message can only be 32 characters long")
+
+    _microbit_send("message", [message])
 
 def set_pin(pin: int, value: bool):
     """(PIN, HIGH) Set PIN to VALUE"""

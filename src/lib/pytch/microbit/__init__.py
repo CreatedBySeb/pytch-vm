@@ -1,6 +1,7 @@
 from .device import (
     clear_display,
 	device,
+    enable_radio,
     Image,
 	LOUD,
     play_music,
@@ -15,6 +16,7 @@ from .device import (
 from .hat_blocks import (
     when_button_pressed,
 	when_gesture_performed,
+    when_message_received,
 	when_pin_high,
     when_sound_heard,
 )

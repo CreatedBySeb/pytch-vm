@@ -1,4 +1,5 @@
 from ..hat_blocks import _append_handler
+from ..syscalls import _microbit_get_message
 
 class when_button_pressed:
     "(BUTTON) Run your method when you press BUTTON on the micro:bit"
@@ -25,6 +26,13 @@ class when_gesture_performed:
 
     def __call__(self, fun):
         return _append_handler(fun, 'microbit', "gesture:" + self.gesture)
+
+def when_message_received(fun):
+    "() Run your method when a message is received by the micro:bit"
+    def message_proxy(self):
+        fun(self, _microbit_get_message())
+
+    return _append_handler(message_proxy, "microbit", "message")
 
 class when_pin_high:
     "(PIN) Run your method when you PIN is high on the micro:bit"

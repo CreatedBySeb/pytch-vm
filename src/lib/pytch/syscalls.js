@@ -173,6 +173,15 @@ var $builtinmodule = function (name) {
         `(SOUND) Play a sound from an object; maybe wait`,
     );
 
+    mod._microbit_get_message = skulpt_function(
+        () => {
+            const device = Sk.pytch.get_active_device();
+            if (!device) throw new Sk.builtin.SystemError("microbit_get_message() called but no micro:bit is connected");
+            return Sk.ffi.remapToPy(device.getNextMessage());
+        },
+        `(MICROBIT) Get the oldest pending message from the micro:bit; may be undefined`,
+    );
+
     mod._microbit_send = skulpt_function(
         (py_command, py_args) => {
             const [command, args] = [py_command, py_args].map(Sk.ffi.remapToJs);
