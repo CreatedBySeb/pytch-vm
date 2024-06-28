@@ -346,9 +346,7 @@ describe("bad sounds", () => {
             () => pytch_errors.assert_sole_error_matches(/sound index.*out of range/)
         );
 
-        const run_expect_ok = run_expect_fun(
-            () => assert.strictEqual(pytch_errors.drain_errors().length, 0)
-        );
+        const run_expect_ok = run_expect_fun(pytch_errors.assert_no_errors);
 
         // sound_index == -1
         run_expect_error();
