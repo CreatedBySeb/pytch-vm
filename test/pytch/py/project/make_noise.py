@@ -7,6 +7,16 @@ from pytch import (
 )
 
 
+class StringOrIndexes:
+    TRUMPET_LOC = "trumpet"
+    VIOLIN_LOC = "violin"
+
+    @when_I_receive("use-index")
+    def use_index(self):
+        self.__class__.TRUMPET_LOC = 0
+        self.__class__.VIOLIN_LOC = 1
+
+
 class Band(Sprite):
     Sounds = [('trumpet', 'trumpet.mp3'),
               ('violin', 'violin.mp3')]
