@@ -573,22 +573,22 @@ var $builtinmodule = function (name) {
             );
         }
 
-        launch_sound_performance(mix_bus_name, name) {
+        launch_sound_performance(mix_bus_name, locator) {
             let cls_name = name_of_py_class(this.py_cls);
 
             let sound = undefined;
-            if (typeof name === "string") {
-                sound = this._sound_from_name.get(name);
+            if (typeof locator === "string") {
+                sound = this._sound_from_name.get(locator);
                 if (typeof sound === "undefined")
                     throw new Sk.builtin.KeyError(
-                        `could not find sound "${name}" in class "${cls_name}"`
+                        `could not find sound "${locator}" in class "${cls_name}"`
                     );
             }
-            else if (typeof name === "number") {
-                const nameAndSound = this._sounds[name];
+            else if (typeof locator === "number") {
+                const nameAndSound = this._sounds[locator];
                 if (typeof nameAndSound === "undefined")
                     throw new Sk.builtin.KeyError(
-                        `sound index ${name} out of range;`
+                        `sound index ${locator} out of range;`
                         + ` for class "${cls_name}", must have index >= 0`
                         + ` and index < ${this._sounds.length}`
                     );
@@ -1078,14 +1078,14 @@ var $builtinmodule = function (name) {
             }
 
             case "play-sound": {
-                let sound_name = syscall_args.sound_name;
+                let sound_locator = syscall_args.sound_locator;
                 let actor_instance = syscall_args.py_obj.$pytchActorInstance;
                 let actor = actor_instance.actor;
                 let mix_bus_name = actor_instance.info_label;
 
                 let performance = actor.launch_sound_performance(
                     mix_bus_name,
-                    sound_name
+                    sound_locator
                 );
 
                 if (syscall_args.wait) {

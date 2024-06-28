@@ -39,13 +39,13 @@ class Actor:
     Sounds = []
     _appearance_names = None
 
-    def start_sound(self, sound_name):
+    def start_sound(self, sound_locator):
         "(SOUND) Start SOUND playing; continue running"
-        play_sound(self, sound_name, False)
+        play_sound(self, sound_locator, False)
 
-    def play_sound_until_done(self, sound_name):
+    def play_sound_until_done(self, sound_locator):
         "(SOUND) Play SOUND; pause until it finishes playing"
-        play_sound(self, sound_name, True)
+        play_sound(self, sound_locator, True)
 
     def set_sound_volume(self, gain):
         "(VOLUME) Set volume for sounds played by SELF to VOLUME"

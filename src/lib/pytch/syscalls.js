@@ -221,7 +221,7 @@ var $builtinmodule = function (name) {
     );
 
     mod.play_sound = skulpt_function(
-        (py_obj, py_sound_name, py_wait) => {
+        (py_obj, py_sound_locator, py_wait) => {
             // Slight abuse of the "maybe_user_function_name" arg:
             throwIfNoExecutingThread(
                 "play_sound",
@@ -229,16 +229,16 @@ var $builtinmodule = function (name) {
             );
 
             if (
-                !Sk.builtin.checkString(py_sound_name)
-                && !Sk.builtin.checkNumber(py_sound_name)
+                !Sk.builtin.checkString(py_sound_locator)
+                && !Sk.builtin.checkNumber(py_sound_locator)
             )
                 throw new Sk.builtin.TypeError(
                     "play_sound() must be given a string or number");
 
-            let sound_name = py_sound_name.v;
+            let sound_locator = py_sound_locator.v;
 
             let wait = Sk.ffi.remapToJs(py_wait);
-            return new_pytch_suspension("play-sound", {py_obj, sound_name, wait});
+            return new_pytch_suspension("play-sound", {py_obj, sound_locator, wait});
         },
         `(SOUND) Play a sound from an object; maybe wait`,
     );
