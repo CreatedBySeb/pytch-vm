@@ -279,7 +279,7 @@ var $builtinmodule = function (name) {
                 throw new Sk.builtin.TypeError(
                     "wait_seconds() must be given a number");
 
-            let n_seconds = Sk.ffi.remapToJs(py_n_seconds);
+            let n_seconds = py_n_seconds.v;
             return new_pytch_suspension("wait-seconds", {n_seconds});
         },
         `(SECONDS) Pause for the given number of seconds`,
