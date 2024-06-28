@@ -584,9 +584,20 @@ var $builtinmodule = function (name) {
                         `could not find sound "${name}" in class "${cls_name}"`
                     );
             }
+            else if (typeof name === "number") {
+                const nameAndSound = this._sounds[name];
+                if (typeof nameAndSound === "undefined")
+                    throw new Sk.builtin.KeyError(
+                        `sound index ${name} out of range;`
+                        + ` for class "${cls_name}", must have index >= 0`
+                        + ` and index < ${this._sounds.length}`
+                    );
+                sound = nameAndSound[1];
+            }
             else
                 throw new Sk.builtin.TypeError(
                     "sound must be identified by string (sound name)"
+                    + " or number (sound index)"
                 );
 
             return sound.launch_new_performance(mix_bus_name);
