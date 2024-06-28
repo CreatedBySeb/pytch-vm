@@ -574,13 +574,20 @@ var $builtinmodule = function (name) {
         }
 
         launch_sound_performance(mix_bus_name, name) {
-            let sound = this._sound_from_name.get(name);
+            let cls_name = name_of_py_class(this.py_cls);
 
-            if (typeof sound === "undefined") {
-                let cls_name = name_of_py_class(this.py_cls);
-                throw new Sk.builtin.KeyError(
-                    `could not find sound "${name}" in class "${cls_name}"`);
+            let sound = undefined;
+            if (typeof name === "string") {
+                sound = this._sound_from_name.get(name);
+                if (typeof sound === "undefined")
+                    throw new Sk.builtin.KeyError(
+                        `could not find sound "${name}" in class "${cls_name}"`
+                    );
             }
+            else
+                throw new Sk.builtin.TypeError(
+                    "sound must be identified by string (sound name)"
+                );
 
             return sound.launch_new_performance(mix_bus_name);
         }
