@@ -17,7 +17,7 @@ class StringOrIndexes:
         self.__class__.VIOLIN_LOC = 1
 
 
-class Band(Sprite):
+class Band(Sprite, StringOrIndexes):
     Sounds = [('trumpet', 'trumpet.mp3'),
               ('violin', 'violin.mp3')]
 
@@ -41,7 +41,7 @@ class Band(Sprite):
         self.set_sound_volume(1.0)
 
 
-class Orchestra(Sprite):
+class Orchestra(Sprite, StringOrIndexes):
     Sounds = [('trumpet', 'trumpet.mp3'),
               ('violin', 'violin.mp3')]
 
