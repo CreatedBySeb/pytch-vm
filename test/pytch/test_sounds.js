@@ -319,6 +319,53 @@ describe("bad sounds", () => {
                                 /Sounds must be a list/));
     });
 
+    it("rejects bad sound index", async () => {
+        const project = await import_deindented(`
+            import pytch
+            class InvisibleElephant(pytch.Sprite):
+                Costumes = []
+                Sounds = ["trumpet.mp3", "violin.mp3"]
+                sound_index = -1
+                @pytch.when_I_receive("incr-idx")
+                def incr_idx(self):
+                    self.__class__.sound_index += 1
+                @pytch.when_I_receive("noise")
+                def noise(self):
+                    self.start_sound(self.sound_index)
+        `);
+
+        const run_expect_fun = (assert_fun) => () => {
+            project.do_synthetic_broadcast("noise");
+            // One frame to start running the receive-handler and another
+            // to deliver the error thrown from the syscall.
+            many_frames(project, 2);
+            assert_fun();
+        };
+
+        const run_expect_error = run_expect_fun(
+            () => pytch_errors.assert_sole_error_matches(/sound index.*out of range/)
+        );
+
+        const run_expect_ok = run_expect_fun(
+            () => assert.strictEqual(pytch_errors.drain_errors().length, 0)
+        );
+
+        // sound_index == -1
+        run_expect_error();
+
+        project.do_synthetic_broadcast("incr-idx");
+        // sound_index == 0
+        run_expect_ok();
+
+        project.do_synthetic_broadcast("incr-idx");
+        // sound_index == 1
+        run_expect_ok();
+
+        project.do_synthetic_broadcast("incr-idx");
+        // sound_index == 2
+        run_expect_error();
+    });
+
     [
         {
             label: "unknown string",
