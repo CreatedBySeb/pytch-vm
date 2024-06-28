@@ -253,6 +253,14 @@ const pytch_errors = (() => {
         assert_sole_error_matches_all([regexp]);
     });
 
+    const assert_no_errors = (() => {
+        const errors = drain_errors();
+        assert.strictEqual(
+            errors.length, 0,
+            `expecting no errors but got ${errors.length}`
+        );
+    });
+
     return {
         append_error,
         drain_errors,
@@ -260,6 +268,7 @@ const pytch_errors = (() => {
         sole_error_string,
         assert_sole_error_matches_all,
         assert_sole_error_matches,
+        assert_no_errors,
     };
 })();
 

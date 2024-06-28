@@ -23,8 +23,7 @@ describe("error handling", () => {
             let project = await import_project();
             project.do_synthetic_broadcast("launch-invasion");
 
-            let errs = pytch_errors.drain_errors();
-            assert.strictEqual(errs.length, 0);
+            pytch_errors.assert_no_errors();
             one_frame(project, { expect_last_frame_to_raise_exception: true });
 
             let err = pytch_errors.sole_error();

@@ -283,8 +283,7 @@ describe("Attribute watchers", () => {
             // The rendering errors should be one-shot, in that the
             // watchers should now all have been cleared.
             project.rendering_instructions();
-            assert.strictEqual(pytch_errors.drain_errors().length, 0,
-                               "render after error generated fresh error/s");
+            pytch_errors.assert_no_errors();
         }));
 
     it("gives useful error for global variable", async () => {

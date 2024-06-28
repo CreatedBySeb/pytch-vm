@@ -384,7 +384,7 @@ describe("Costume handling", () => {
 
             // Nothing should happen if we run a few frames.
             many_frames(project, 3);
-            assert.strictEqual(pytch_errors.drain_errors().length, 0);
+            pytch_errors.assert_no_errors();
 
             // But asking the costume-less sprite to show itself should produce an
             // error.
