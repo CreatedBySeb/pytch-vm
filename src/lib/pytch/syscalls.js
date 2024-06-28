@@ -230,9 +230,10 @@ var $builtinmodule = function (name) {
 
             if (
                 !Sk.builtin.checkString(py_sound_name)
+                && !Sk.builtin.checkNumber(py_sound_name)
             )
                 throw new Sk.builtin.TypeError(
-                    "play_sound() must be given a string");
+                    "play_sound() must be given a string or number");
 
             let sound_name = py_sound_name.v;
 
