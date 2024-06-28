@@ -228,10 +228,13 @@ var $builtinmodule = function (name) {
                 "start_sound() or play_sound_until_done"
             );
 
-            let sound_name = Sk.ffi.remapToJs(py_sound_name);
-            if (typeof sound_name !== "string")
+            if (
+                !Sk.builtin.checkString(py_sound_name)
+            )
                 throw new Sk.builtin.TypeError(
                     "play_sound() must be given a string");
+
+            let sound_name = py_sound_name.v;
 
             let wait = Sk.ffi.remapToJs(py_wait);
             return new_pytch_suspension("play-sound", {py_obj, sound_name, wait});
