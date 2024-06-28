@@ -275,8 +275,11 @@ var $builtinmodule = function (name) {
     mod.wait_seconds = skulpt_function(
         (py_n_seconds) => {
             throwIfNoExecutingThread("wait_seconds");
+            if (!Sk.builtin.checkNumber(py_n_seconds))
+                throw new Sk.builtin.TypeError(
+                    "wait_seconds() must be given a number");
 
-            let n_seconds = Sk.ffi.remapToJs(py_n_seconds);
+            let n_seconds = py_n_seconds.v;
             return new_pytch_suspension("wait-seconds", {n_seconds});
         },
         `(SECONDS) Pause for the given number of seconds`,

@@ -85,6 +85,20 @@ describe("error handling", () => {
         });
     });
 
+    it("rejects invalid arg to wait_seconds()", async () => {
+        const project = await import_deindented(`
+            import pytch
+            class Banana(pytch.Sprite):
+                @pytch.when_I_receive("bad-wait")
+                def bad_wait(self):
+                    pytch.wait_seconds("42")
+        `);
+
+        project.do_synthetic_broadcast("bad-wait");
+        one_frame(project);
+        pytch_errors.assert_sole_error_matches(/must be given a number/);
+    });
+
     it("reports error from non-Pytch suspension", async () => {
         const project = await import_deindented(`
 
