@@ -29,7 +29,9 @@ class Band(Sprite, StringOrIndexes):
 
     @when_I_receive("band-play")
     def play_instruments(self):
-        self.start_sound("trumpet" if self.is_clone else "violin")
+        self.start_sound(
+            self.TRUMPET_LOC if self.is_clone else self.VIOLIN_LOC
+        )
 
     @when_I_receive("band-quiet")
     def quiet(self):
@@ -48,21 +50,21 @@ class Orchestra(Sprite, StringOrIndexes):
     @when_I_receive('play-trumpet')
     def play_trumpet(self):
         self.played_trumpet = 'no'
-        self.start_sound('trumpet')
+        self.start_sound(self.TRUMPET_LOC)
         self.played_trumpet = 'yes'
 
     @when_I_receive('play-violin')
     def play_violin(self):
         self.played_violin = 'no'
-        self.play_sound_until_done('violin')
+        self.play_sound_until_done(self.VIOLIN_LOC)
         self.played_violin = 'yes'
 
     @when_I_receive('play-both')
     def play_both(self):
         self.played_both = 'no'
-        self.start_sound('trumpet')
+        self.start_sound(self.TRUMPET_LOC)
         self.played_both = 'nearly'
-        self.play_sound_until_done('violin')
+        self.play_sound_until_done(self.VIOLIN_LOC)
         self.played_both = 'yes'
 
     @when_I_receive('silence')
