@@ -83,11 +83,16 @@ describe("waiting and non-waiting sounds", () => {
         pytch_errors.assert_sole_error_matches(/unsupported operand type/);
     });
 
+    [{ useIndex: false }, { useIndex: true }].forEach(spec => {
+    const specLabel = spec.useIndex ? "index" : "name";
     with_project("py/project/make_noise.py", (import_project) => {
-    it("can play trumpet", async () => {
+    it(`can play trumpet (${specLabel})`, async () => {
         let project = await import_project();
         let orchestra = project.instance_0_by_class_name("Orchestra");
         let project_one_frame = one_frame_fun(project);
+
+        if (spec.useIndex)
+            project.do_synthetic_broadcast("use-index");
 
         project.do_synthetic_broadcast("play-trumpet");
 
@@ -273,7 +278,7 @@ describe("waiting and non-waiting sounds", () => {
         project_one_frame();
         assert_running_performances([]);
         assert.strictEqual(orchestra.js_attr("played_both"), "yes")
-    })});
+    })})});
 });
 
 describe("bad sounds", () => {
