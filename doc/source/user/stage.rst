@@ -16,14 +16,15 @@ Methods and properties available on the Stage
 Your own version of the Stage can use the following methods, which are
 provided by Pytch:
 
-.. function:: self.start_sound(sound_name)
-              self.play_sound_until_done(sound_name)
+.. function:: self.start_sound(sound_name_or_index)
+              self.play_sound_until_done(sound_name_or_index)
    :noindex:
 
    These methods work in the same way as the ones provided by the
    ``Sprite`` class.  See :ref:`the help in the Sprite
-   page<methods_playing_sounds>` for details.  The given ``sound_name``
-   must refer to a Sound you have defined — see :doc:`sound-specs`.
+   page<methods_playing_sounds>` for details.  The given
+   ``sound_name_or_index`` must refer to a Sound you have defined —
+   see :doc:`sound-specs`.
 
 .. function:: self.switch_backdrop(backdrop_name)
 

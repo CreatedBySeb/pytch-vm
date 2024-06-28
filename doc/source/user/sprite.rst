@@ -293,19 +293,21 @@ Sounds have to be loaded into the Sprite when it is created (see
 :doc:`sound-specs`). Once a sound has been loaded you can get the
 sprite to play it.
 
-.. function:: self.start_sound(sound_name)
+.. function:: self.start_sound(sound_name_or_index)
 
-   Start a sound playing. You refer to the sound using its *label*, which
-   is usually the filename without the extension (see :doc:`sound-specs`
-   for full details). Once the sound has started the Sprite will move on
-   to its next instruction.
+   Start a sound playing. You refer to the sound in one of two ways.
+   You can use its *label*, which is usually the filename without the
+   extension (see :doc:`sound-specs` for full details), or you can use
+   its *index*, which is the zero-based position of the required sound
+   in the Sprite's list of sounds.  Once the sound has started the
+   Sprite will move on to its next instruction.
 
-.. function:: self.play_sound_until_done(sound_name)
+.. function:: self.play_sound_until_done(sound_name_or_index)
 
-   Start a sound playing. You can refer to the sound using its *label*,
-   as for ``start_sound()``. This method will not return until the entire
-   sound has played, so the script it is contained in won't do its next
-   instruction until then.
+   Start a sound playing. You can refer to the sound using its *label*
+   or its *index*, as for ``start_sound()``. This method will not
+   return until the entire sound has played, so the script it is
+   contained in won't do its next instruction until then.
 
 
 Making and deleting copies of a Sprite

@@ -83,11 +83,16 @@ describe("waiting and non-waiting sounds", () => {
         pytch_errors.assert_sole_error_matches(/unsupported operand type/);
     });
 
+    [{ useIndex: false }, { useIndex: true }].forEach(spec => {
+    const specLabel = spec.useIndex ? "index" : "name";
     with_project("py/project/make_noise.py", (import_project) => {
-    it("can play trumpet", async () => {
+    it(`can play trumpet (${specLabel})`, async () => {
         let project = await import_project();
         let orchestra = project.instance_0_by_class_name("Orchestra");
         let project_one_frame = one_frame_fun(project);
+
+        if (spec.useIndex)
+            project.do_synthetic_broadcast("use-index");
 
         project.do_synthetic_broadcast("play-trumpet");
 
@@ -273,7 +278,7 @@ describe("waiting and non-waiting sounds", () => {
         project_one_frame();
         assert_running_performances([]);
         assert.strictEqual(orchestra.js_attr("played_both"), "yes")
-    })});
+    })})});
 });
 
 describe("bad sounds", () => {
@@ -312,6 +317,53 @@ describe("bad sounds", () => {
             assertBuildErrorFun("register-actor",
                                 Sk.builtin.ValueError,
                                 /Sounds must be a list/));
+    });
+
+    it("rejects bad sound index", async () => {
+        const project = await import_deindented(`
+            import pytch
+            class InvisibleElephant(pytch.Sprite):
+                Costumes = []
+                Sounds = ["trumpet.mp3", "violin.mp3"]
+                sound_index = -1
+                @pytch.when_I_receive("incr-idx")
+                def incr_idx(self):
+                    self.__class__.sound_index += 1
+                @pytch.when_I_receive("noise")
+                def noise(self):
+                    self.start_sound(self.sound_index)
+        `);
+
+        const run_expect_fun = (assert_fun) => () => {
+            project.do_synthetic_broadcast("noise");
+            // One frame to start running the receive-handler and another
+            // to deliver the error thrown from the syscall.
+            many_frames(project, 2);
+            assert_fun();
+        };
+
+        const run_expect_error = run_expect_fun(
+            () => pytch_errors.assert_sole_error_matches(/sound index.*out of range/)
+        );
+
+        const run_expect_ok = run_expect_fun(
+            () => assert.strictEqual(pytch_errors.drain_errors().length, 0)
+        );
+
+        // sound_index == -1
+        run_expect_error();
+
+        project.do_synthetic_broadcast("incr-idx");
+        // sound_index == 0
+        run_expect_ok();
+
+        project.do_synthetic_broadcast("incr-idx");
+        // sound_index == 1
+        run_expect_ok();
+
+        project.do_synthetic_broadcast("incr-idx");
+        // sound_index == 2
+        run_expect_error();
     });
 
     [
