@@ -347,7 +347,9 @@ describe("bad sounds", () => {
         };
 
         const run_expect_error = run_expect_fun(
-            () => pytch_errors.assert_sole_error_matches(/sound index.*out of range/)
+            () => pytch_errors.assert_sole_error_matches(
+                /sound index.*out of range.*index < 2/
+            )
         );
 
         const run_expect_ok = run_expect_fun(pytch_errors.assert_no_errors);
@@ -368,7 +370,9 @@ describe("bad sounds", () => {
         run_expect_error();
 
         run_expect_fun(
-            () => pytch_errors.assert_sole_error_matches(/sound index.*must be integer/),
+            () => pytch_errors.assert_sole_error_matches(
+                /sound index.*must be integer.*index < 2/
+            ),
             "try-float"
         )();
     });
