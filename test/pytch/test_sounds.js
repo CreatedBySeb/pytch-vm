@@ -334,8 +334,9 @@ describe("bad sounds", () => {
                     self.start_sound(self.sound_index)
         `);
 
-        const run_expect_fun = (assert_fun) => () => {
-            project.do_synthetic_broadcast("noise");
+        const run_expect_fun = (assert_fun, maybe_msg) => () => {
+            const msg = maybe_msg ?? "noise";
+            project.do_synthetic_broadcast(msg);
             // One frame to start running the receive-handler and another
             // to deliver the error thrown from the syscall.
             many_frames(project, 2);
