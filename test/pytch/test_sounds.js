@@ -332,10 +332,14 @@ describe("bad sounds", () => {
                 @pytch.when_I_receive("noise")
                 def noise(self):
                     self.start_sound(self.sound_index)
+                @pytch.when_I_receive("try-float")
+                def try_float(self):
+                    self.start_sound(2.25)
         `);
 
-        const run_expect_fun = (assert_fun) => () => {
-            project.do_synthetic_broadcast("noise");
+        const run_expect_fun = (assert_fun, maybe_msg) => () => {
+            const msg = maybe_msg ?? "noise";
+            project.do_synthetic_broadcast(msg);
             // One frame to start running the receive-handler and another
             // to deliver the error thrown from the syscall.
             many_frames(project, 2);
@@ -343,7 +347,9 @@ describe("bad sounds", () => {
         };
 
         const run_expect_error = run_expect_fun(
-            () => pytch_errors.assert_sole_error_matches(/sound index.*out of range/)
+            () => pytch_errors.assert_sole_error_matches(
+                /sound index.*out of range.*index < 2/
+            )
         );
 
         const run_expect_ok = run_expect_fun(pytch_errors.assert_no_errors);
@@ -362,6 +368,13 @@ describe("bad sounds", () => {
         project.do_synthetic_broadcast("incr-idx");
         // sound_index == 2
         run_expect_error();
+
+        run_expect_fun(
+            () => pytch_errors.assert_sole_error_matches(
+                /sound index.*must be integer.*index < 2/
+            ),
+            "try-float"
+        )();
     });
 
     [
