@@ -7,3 +7,4 @@ help learners bridge the gap from Scratch to Python.
 ## Links
 
 * [The Pytch platform](https://pytch.org/)
+* [About the Pytch project](https://pytch.scss.tcd.ie)
