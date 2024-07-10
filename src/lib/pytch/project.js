@@ -585,12 +585,14 @@ var $builtinmodule = function (name) {
                     );
             }
             else if (typeof locator === "number") {
+                const nSounds = this._sounds.length;
+
                 const index = locator | 0;
                 if (index !== locator)
                     throw new Sk.builtin.ValueError(
                         `bad sound index ${locator};`
                         + ` must be integer and must have index >= 0`
-                        + ` and index < ${this._sounds.length}`
+                        + ` and index < ${nSounds}`
                     );
 
                 const nameAndSound = this._sounds[index];
@@ -598,7 +600,7 @@ var $builtinmodule = function (name) {
                     throw new Sk.builtin.IndexError(
                         `sound index ${index} out of range;`
                         + ` for class "${cls_name}", must have index >= 0`
-                        + ` and index < ${this._sounds.length}`
+                        + ` and index < ${nSounds}`
                     );
                 sound = nameAndSound[1];
             }
