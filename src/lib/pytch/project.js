@@ -587,8 +587,8 @@ var $builtinmodule = function (name) {
             else if (typeof locator === "number") {
                 const nameAndSound = this._sounds[locator];
                 if (typeof nameAndSound === "undefined")
-                    throw new Sk.builtin.KeyError(
-                        `sound index ${locator} out of range;`
+                    throw new Sk.builtin.IndexError(
+                        `sound index ${index} out of range;`
                         + ` for class "${cls_name}", must have index >= 0`
                         + ` and index < ${this._sounds.length}`
                     );
