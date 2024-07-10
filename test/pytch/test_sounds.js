@@ -332,6 +332,9 @@ describe("bad sounds", () => {
                 @pytch.when_I_receive("noise")
                 def noise(self):
                     self.start_sound(self.sound_index)
+                @pytch.when_I_receive("try-float")
+                def try_float(self):
+                    self.start_sound(2.25)
         `);
 
         const run_expect_fun = (assert_fun, maybe_msg) => () => {
@@ -363,6 +366,11 @@ describe("bad sounds", () => {
         project.do_synthetic_broadcast("incr-idx");
         // sound_index == 2
         run_expect_error();
+
+        run_expect_fun(
+            () => pytch_errors.assert_sole_error_matches(/sound index.*must be integer/),
+            "try-float"
+        )();
     });
 
     [
