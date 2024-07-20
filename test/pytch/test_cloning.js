@@ -362,6 +362,16 @@ describe("cloning", () => {
         `;
     }
 
+    it("rejects clone of non-class", async () => {
+        const project = await import_deindented(bad_clone_code('"Banana"'));
+        project.do_synthetic_broadcast("clone");
+        many_frames(project, 2);
+
+        pytch_errors.assert_sole_error_matches(
+            /obj must be an instance of a Pytch-registered Sprite class/
+        );
+    });
+
     it("puts clone just behind parent", async () => {
         const project = await import_deindented(`
 
