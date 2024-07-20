@@ -372,6 +372,16 @@ describe("cloning", () => {
         );
     });
 
+    it("rejects clone of Stage", async () => {
+        const project = await import_deindented(bad_clone_code("Background"));
+        project.do_synthetic_broadcast("clone");
+        many_frames(project, 2);
+
+        pytch_errors.assert_sole_error_matches(
+            /cls must be a Pytch-registered Sprite class/
+        );
+    });
+
     it("puts clone just behind parent", async () => {
         const project = await import_deindented(`
 
