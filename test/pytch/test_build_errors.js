@@ -121,6 +121,10 @@ describe("build-error handling", () => {
                     + `did you call.*${spec.user_function}`
                 )
             );
+
+            // The Banana class and manual registration is just to allow
+            // us to test the create_clone_of() syscall, but does no harm
+            // for the other tests specs.
             const do_import = import_deindented(`
                 import pytch
                 class Banana(pytch.Sprite): pass
@@ -128,6 +132,7 @@ describe("build-error handling", () => {
                 project.register_sprite_class(Banana)
                 pytch.${qualifier}${spec.user_function}${spec.args_fragment}
             `)
+
             await assert.rejects(do_import, assertDetails);
         });
     });
