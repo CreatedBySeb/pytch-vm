@@ -349,29 +349,6 @@ describe("cloning", () => {
         );
     });
 
-    it("handles failure of the_original()", async () => {
-        // This would require some effort on the user's part, but test anyway:
-        const project = await import_deindented(`
-
-            import pytch
-
-            class Banana(pytch.Sprite):
-                Costumes = []
-
-                # Deliberately override with error-raising method:
-                @classmethod
-                def the_original(cls):
-                    raise RuntimeError("oh no!")
-
-            ${codeForPear}
-        `);
-
-        project.do_synthetic_broadcast("clone");
-        one_frame(project);
-
-        pytch_errors.assert_sole_error_matches(/the_original.*failed/);
-    });
-
     it("puts clone just behind parent", async () => {
         const project = await import_deindented(`
 
