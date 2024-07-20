@@ -344,7 +344,9 @@ describe("cloning", () => {
         project.do_synthetic_broadcast("clone");
         one_frame(project);
 
-        pytch_errors.assert_sole_error_matches(/can only clone a Pytch-registered/);
+        pytch_errors.assert_sole_error_matches(
+            /cls must be a Pytch-registered Sprite class/
+        );
     });
 
     it("handles failure of the_original()", async () => {
