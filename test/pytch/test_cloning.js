@@ -349,6 +349,19 @@ describe("cloning", () => {
         );
     });
 
+    function bad_clone_code(clone_arg) {
+        return `
+            import pytch
+            class Background(pytch.Stage):
+                Backdrops = ["solid-white-stage.png"]
+            class Banana(pytch.Sprite):
+                Costumes = []
+                @pytch.when_I_receive("clone")
+                def make_clone(self):
+                    pytch.create_clone_of(${clone_arg})
+        `;
+    }
+
     it("puts clone just behind parent", async () => {
         const project = await import_deindented(`
 
