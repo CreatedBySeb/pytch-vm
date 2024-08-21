@@ -344,30 +344,42 @@ describe("cloning", () => {
         project.do_synthetic_broadcast("clone");
         one_frame(project);
 
-        pytch_errors.assert_sole_error_matches(/can only clone a Pytch-registered/);
+        pytch_errors.assert_sole_error_matches(
+            /cls must be a Pytch-registered Sprite class/
+        );
     });
 
-    it("handles failure of the_original()", async () => {
-        // This would require some effort on the user's part, but test anyway:
-        const project = await import_deindented(`
-
+    function bad_clone_code(clone_arg) {
+        return `
             import pytch
-
+            class Background(pytch.Stage):
+                Backdrops = ["solid-white-stage.png"]
             class Banana(pytch.Sprite):
                 Costumes = []
+                @pytch.when_I_receive("clone")
+                def make_clone(self):
+                    pytch.create_clone_of(${clone_arg})
+        `;
+    }
 
-                # Deliberately override with error-raising method:
-                @classmethod
-                def the_original(cls):
-                    raise RuntimeError("oh no!")
-
-            ${codeForPear}
-        `);
-
+    it("rejects clone of non-class", async () => {
+        const project = await import_deindented(bad_clone_code('"Banana"'));
         project.do_synthetic_broadcast("clone");
-        one_frame(project);
+        many_frames(project, 2);
 
-        pytch_errors.assert_sole_error_matches(/the_original.*failed/);
+        pytch_errors.assert_sole_error_matches(
+            /obj must be an instance of a Pytch-registered Sprite class/
+        );
+    });
+
+    it("rejects clone of Stage", async () => {
+        const project = await import_deindented(bad_clone_code("Background"));
+        project.do_synthetic_broadcast("clone");
+        many_frames(project, 2);
+
+        pytch_errors.assert_sole_error_matches(
+            /cls must be a Pytch-registered Sprite class/
+        );
     });
 
     it("puts clone just behind parent", async () => {

@@ -289,6 +289,39 @@ var $builtinmodule = function (name) {
         `(SECONDS) Pause for the given number of seconds`,
     );
 
+    mod._effective_source_object = skulpt_function(
+        (py_cls_or_obj) => {
+            if (Sk.builtin.checkClass(py_cls_or_obj)) {
+                const actor = py_cls_or_obj.$pytchActor
+                if (
+                    actor == null
+                    || actor.class_kind_name !== "Sprite"
+                ) {
+                    throw new Sk.builtin.ValueError(
+                        "in create_clone_of(cls), cls must be"
+                            + " a Pytch-registered Sprite class");
+                }
+
+                return actor.instances[0].py_object;
+            } else {
+                const instance = py_cls_or_obj.$pytchActorInstance;
+                if (
+                    instance == null
+                    || instance.actor == null
+                    || instance.actor.class_kind_name !== "Sprite"
+                ) {
+                    throw new Sk.builtin.ValueError(
+                        "in create_clone_of(obj), obj must be"
+                            + " an instance of"
+                            + " a Pytch-registered Sprite class");
+                }
+
+                return py_cls_or_obj;
+            }
+        },
+        "Effective instance of registered Sprite-derived class to clone",
+    );
+
     // TODO: Allow None as py_parent_instance, to register an instance
     // which was not created by Pytch's clone mechanism?
     mod.register_sprite_instance = skulpt_function(
