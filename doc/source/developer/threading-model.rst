@@ -3,11 +3,6 @@
 Threading model
 ---------------
 
-.. contents::
-   :depth: 1
-   :local:
-   :backlinks: none
-
 The threading model is fundamentally cooperative rather than
 pre-emptive. The Skulpt compiler has been modified to automatically
 insert ‘cede control’ calls in the bodies of ‘for’ and ‘while’ loops.
