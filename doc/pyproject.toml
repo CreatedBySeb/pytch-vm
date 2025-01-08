@@ -1,0 +1,16 @@
+[project]
+name = "pytch-vm-doc"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Ben North",email = "ben.north@tcd.ie"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
