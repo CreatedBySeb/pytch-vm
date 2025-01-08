@@ -5,10 +5,11 @@ description = ""
 authors = [
     {name = "Ben North",email = "ben.north@tcd.ie"}
 ]
-readme = "README.md"
+readme = "README-developing-docs"
 requires-python = ">=3.10,<4.0"
 dependencies = [
 ]
+package-mode = false
 
 
 [build-system]
