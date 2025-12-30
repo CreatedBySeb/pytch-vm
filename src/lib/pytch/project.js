@@ -259,6 +259,7 @@ var $builtinmodule = function (name) {
                 green_flag: new EventHandlerGroup(),
                 keypress: new Map(),
                 message: new Map(),
+                microbit: new Map(),
             };
 
             this.clone_handlers = [];
@@ -455,6 +456,14 @@ var $builtinmodule = function (name) {
                 key_handlers.get(event_data).push(handler);
                 break;
 
+            case "microbit":
+                const handlers = this.event_handlers.microbit;
+                if (!handlers.has(event_data)) {
+                    handlers.set(event_data, new EventHandlerGroup());
+                }
+                handlers.get(event_data).push(handler);
+                break;
+
             case "clone":
                 this.clone_handlers.push(handler_py_func);
                 break;
@@ -552,6 +561,12 @@ var $builtinmodule = function (name) {
         create_threads_for_keypress(thread_group, keyname) {
             let event_handler_group = (this.event_handlers.keypress.get(keyname)
                                        || EventHandlerGroup.empty);
+            event_handler_group.create_threads(thread_group, this.parent_project);
+        }
+
+        create_threads_for_microbit(thread_group, event) {
+            const event_handler_group = (this.event_handlers.microbit.get(event)
+                                        || EventHandlerGroup.empty);
             event_handler_group.create_threads(thread_group, this.parent_project);
         }
 
@@ -1947,9 +1962,28 @@ var $builtinmodule = function (name) {
             });
         }
 
+        launch_microbit_handlers() {
+            const device = Sk.pytch.get_active_device();
+            if (!device) {
+                return;
+            }
+
+            const events = device.getEvents();
+            events.forEach((event) => {
+                const thread_group = new ThreadGroup(`microbit "${event}"`);
+
+                this.actors.forEach((a) => {
+                    a.create_threads_for_microbit(thread_group, event);
+                });
+
+                this.thread_groups.push(thread_group);
+            });
+        }
+
         one_frame() {
             this.launch_keypress_handlers();
             this.launch_mouse_click_handlers();
+            this.launch_microbit_handlers();
 
             this.thread_groups.forEach(tg => tg.maybe_cull_threads());
             this.thread_groups.forEach(tg => tg.maybe_wake_threads());
