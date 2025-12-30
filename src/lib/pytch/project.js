@@ -1026,6 +1026,9 @@ var $builtinmodule = function (name) {
             case Thread.State.AWAITING_ANSWER_TO_QUESTION:
                 return this.sleeping_on.is_answered();
 
+            case Thread.State.AWAITING_MICROBIT_RESULT:
+                return this.sleeping_on !== null;
+
             case Thread.State.ZOMBIE:
                 return false;
 
@@ -1051,6 +1054,37 @@ var $builtinmodule = function (name) {
                 // Use the question's answer as the return value from the
                 // suspension, thereby giving it back to Python.
                 this.skulpt_susp.data.set_success(this.sleeping_on.value);
+                break;
+
+            case Thread.State.AWAITING_MICROBIT_RESULT:
+                const result = this.sleeping_on;
+
+                if (!(result instanceof Error)) {
+                    this.skulpt_susp.data.set_success(Sk.ffi.remapToPy(result));
+                } else if (result.name === "MicroBitError") {
+                    // If the type has a corresponding type in Skulpt, let's use
+                    // that, otherwise we fall back to SystemError as a sensible
+                    // default.
+                    const error_class = (result.type in Sk.builtin)
+                        ? Sk.builtin[result.type]
+                        : Sk.builtin.SystemError;
+
+                    const reason = (result.reason || "") + " (from micro:bit)";
+                    this.skulpt_susp.data.set_failure(new error_class(reason));
+                } else {
+                    // Unexpected error occurred
+                    console.error(
+                        "Skulpt encountered an unexpected error when communicating with the micro:bit"
+                    );
+                    console.error(result);
+
+                    this.skulpt_susp.data.set_failure(
+                        new Sk.builtin.ExternalError(
+                            "Unexpected error communicating with micro:bit"
+                        )
+                    );
+                }
+
                 break;
 
             default:
@@ -1178,6 +1212,27 @@ var $builtinmodule = function (name) {
                 const { py_object, py_attribute_name } = syscall_args;
 
                 this.parent_project.hide_object_attribute(py_object, py_attribute_name);
+
+                return [];
+            }
+
+            case "microbit-send": {
+                const microbit = Sk.pytch.get_active_device();
+
+                if (!microbit) {
+                    throw new Sk.builtin.SystemError(
+                        "No micro:bit is connected and active, check the Devices pane"
+                    );
+                }
+
+                const { command, args } = syscall_args;
+
+                this.state = Thread.State.AWAITING_MICROBIT_RESULT;
+                this.sleeping_on = null;
+
+                microbit.send(command, args)
+                    .then((result) => this.sleeping_on = result)
+                    .catch((err) => this.sleeping_on = err);
 
                 return [];
             }
@@ -1328,6 +1383,12 @@ var $builtinmodule = function (name) {
         // given.  A reference to the UserQuestion is stored in the Thread
         // instance's "sleeping_on" property.
         AWAITING_ANSWER_TO_QUESTION: "awaiting-answer-to-question",
+
+        // AWAITING_MICROBIT_RESULT: The thread has sent a command to the active
+        // micro:bit and is waiting for it to return a result or raise an error.
+        // While waiting the "sleeping_on" property is set to null, and once the
+        // command is resolved, this is set to the result or a MicroBitError.
+        AWAITING_MICROBIT_RESULT: "awaiting-microbit-result",
 
         // ZOMBIE: The thread has terminated but has not yet been cleared from
         // the list of live threads.

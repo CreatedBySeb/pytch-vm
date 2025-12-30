@@ -503,6 +503,24 @@ var $builtinmodule = function (name) {
         `Remove a watcher for an object attribute`,
     );
 
+    mod._microbit_send = skulpt_function(
+        (py_command, py_args) => {
+            const [command, args] = [py_command, py_args].map(Sk.ffi.remapToJs);
+
+            if (typeof command !== "string") {
+                throw new Sk.builtin.TypeError(
+                    "_microbit_send(): command must be string"
+                );
+            }
+
+            return new_pytch_suspension(
+                "microbit-send",
+                { command, args: args.map((a) => a.toString()) },
+            );
+        },
+        `Send a command to the currently active micro:bit`,
+    );
+
     mod.stop_all = skulpt_function(
         () => new_pytch_suspension("stop-all-threads", {}),
         `() Stop all currently-running scripts`,
