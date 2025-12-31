@@ -505,7 +505,7 @@ var $builtinmodule = function (name) {
 
     mod._microbit_send = skulpt_function(
         (py_command, py_args) => {
-            const [command, args] = [py_command, py_args].map(Sk.ffi.remapToJs);
+            const [command, args = []] = [py_command, py_args].map(Sk.ffi.remapToJs);
 
             if (typeof command !== "string") {
                 throw new Sk.builtin.TypeError(
@@ -515,10 +515,34 @@ var $builtinmodule = function (name) {
 
             return new_pytch_suspension(
                 "microbit-send",
-                { command, args: args.map((a) => a.toString()) },
+                {
+                    command,
+                    args: args.map((a) => {
+                        if (typeof a === "boolean") {
+                            return (a) ? "True" : "False";
+                        }
+
+                        return a.toString();
+                    }),
+                },
             );
         },
         `Send a command to the currently active micro:bit`,
+    );
+
+    mod._is_microbit_v2 = skulpt_function(
+        () => {
+            const device = Sk.pytch.get_active_device();
+
+            if (device === null) {
+                throw new Sk.builtin.SystemError(
+                    "No micro:bit is connected and active, check the Devices pane"
+                );
+            }
+
+            return device.revision[0] === 2;
+        },
+        "Returns if the connected micro:bit is a V2 device",
     );
 
     mod.stop_all = skulpt_function(
