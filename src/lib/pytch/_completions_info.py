@@ -1,5 +1,6 @@
 import re
 
+
 def _parse_raw_doc(raw_doc):
     line0 = raw_doc.split("\n", 1)[0].lstrip()
     if line0.startswith("("):
@@ -10,12 +11,12 @@ def _parse_raw_doc(raw_doc):
 
 
 def _user_facing_completions():
-    """Extract completion info for pytch, Sprite, Stage
-    """
+    """Extract completion info for pytch, Sprite, Stage"""
 
     # At call time, to avoid circular import:
     import pytch
     import pytch.actor
+    import pytch.microbit
 
     actor_exclusions = [
         "Sounds",
@@ -43,6 +44,10 @@ def _user_facing_completions():
             "LoopIterationsPerFrame",
             "non_yielding_loops",
         ],
+        "pytch.microbit": [
+            "_get_var",
+            "_is_microbit_v2",
+        ],
         "Actor": actor_exclusions,
         "Sprite": ["Costumes"] + actor_exclusions,
         "Stage": ["Backdrops"] + actor_exclusions,
@@ -51,7 +56,7 @@ def _user_facing_completions():
     records_by_parent = {}
     attributes_without_docstring = []
 
-    for obj in [pytch, pytch.actor.Actor, pytch.Sprite, pytch.Stage]:
+    for obj in [pytch, pytch.actor.Actor, pytch.microbit, pytch.Sprite, pytch.Stage]:
         parent_name = obj.__name__
         exclusions = exclusions_by_parent[parent_name]
         records = records_by_parent[parent_name] = []
