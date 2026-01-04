@@ -1,4 +1,6 @@
 from collections import namedtuple
+import sys
+from types import ModuleType
 
 from ..syscalls import (
     _is_microbit_v2,
@@ -38,15 +40,16 @@ class Buttons(namedtuple("Buttons", ["a", "b", "logo"])):
         return self.a and self.b and self.logo
 
 
-def __getattr__(name: str):
-    # Special handling for variables which allows us to represent them as
-    # attributes even though they require a function call
-
-    if name == "acceleration":
+class Device(ModuleType):
+    @property
+    def acceleration(self):
+        """Reports the acceleration felt by the micro:bit"""
         values = _get_var("accel")
         return Acceleration(*[float(val) for val in values])
 
-    if name == "buttons":
+    @property
+    def buttons(self):
+        """Reports whether any of the buttons on the micro:bit are pressed"""
         values = _get_var("buttons")
 
         # V1 only provides 2 values, so we just set the logo value to False
@@ -55,26 +58,36 @@ def __getattr__(name: str):
 
         return Buttons(*[val == "True" for val in values])
 
-    if name == "gesture":
-        # String representing gesture type
+    @property
+    def gesture(self):
+        """Reports the gesture currently detected by the micro:bit"""
         return _get_var("gesture")[0]
 
-    if name == "light_level":
-        # 0 - 255
-        return int(_get_var("light")[0])
+    @property
+    def light_level(self):
+        """Reports the level of light detected by the micro:bit's display"""
+        return self._get_int("light")
 
-    if name == "pins":
-        # Array of integer values, 0 for low, 1 for high
+    @property
+    def pins(self):
+        """Reports the digital value on each of the micro:bit's pins"""
         return [int(val) for val in _get_var("pins")]
 
-    if name == "sound_level":
+    @property
+    def sound_level(self):
+        """Reports the level of sound heard by the micro:bit's microphone"""
         if not _is_microbit_v2():
             raise AttributeError()
 
-        # 0 - 255, V2 only
-        return int(_get_var("sound")[0])
+        return self._get_int("sound")
 
-    if name == "temperature":
-        return int(_get_var("temp")[0])
+    @property
+    def temperature(self):
+        """Reports the temperature felt by the micro:bit in Celsius"""
+        return self._get_int("temp")
 
-    raise AttributeError()
+    def _get_int(self, name: str) -> int:
+        return int(_get_var(name)[0])
+
+
+sys.modules[__name__].__class__ = Device

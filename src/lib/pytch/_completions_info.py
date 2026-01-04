@@ -45,18 +45,26 @@ def _user_facing_completions():
             "non_yielding_loops",
         ],
         "pytch.microbit": [
-            "_get_var",
-            "_is_microbit_v2",
+            "ModuleType",
         ],
         "Actor": actor_exclusions,
+        "Device": [],
         "Sprite": ["Costumes"] + actor_exclusions,
         "Stage": ["Backdrops"] + actor_exclusions,
     }
 
     records_by_parent = {}
     attributes_without_docstring = []
+    objects = [
+        pytch,
+        pytch.actor.Actor,
+        pytch.microbit,
+        pytch.microbit.Device,
+        pytch.Sprite,
+        pytch.Stage,
+    ]
 
-    for obj in [pytch, pytch.actor.Actor, pytch.microbit, pytch.Sprite, pytch.Stage]:
+    for obj in objects:
         parent_name = obj.__name__
         exclusions = exclusions_by_parent[parent_name]
         records = records_by_parent[parent_name] = []
