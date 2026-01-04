@@ -3,7 +3,7 @@ from .validation import BRIGHTNESS, DIGITAL_VALUES, PINS, PIXELS, RangeError
 
 
 class Image:
-    "Define images for the micro:bit display as arrays of pixels"
+    "(ROW_1, ROW_2, ...) Define images for the micro:bit display as rows of pixels"
 
     def __init__(self, *rows):
         if len(rows) != 5:
@@ -50,7 +50,7 @@ def _get_var(var: str):
 
 
 def clear_display():
-    "Clear the micro:bit's display"
+    "() Clear the micro:bit's display"
 
     _microbit_send("clear")
 
@@ -107,7 +107,7 @@ def show_text(text: str, wait: bool = False, loop: bool = False):
 
 
 def stop_music():
-    "Stops any currently playing music on the micro:bit"
+    "() Stops any currently playing music on the micro:bit"
 
     _microbit_send("stop_music")
 
