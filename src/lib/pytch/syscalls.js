@@ -530,7 +530,7 @@ var $builtinmodule = function (name) {
         `Send a command to the currently active micro:bit`,
     );
 
-    mod._is_microbit_v2 = skulpt_function(
+    mod._get_microbit_rev = skulpt_function(
         () => {
             const device = Sk.pytch.get_active_device();
 
@@ -540,9 +540,9 @@ var $builtinmodule = function (name) {
                 );
             }
 
-            return device.revision[0] === 2;
+            return Sk.ffi.remapToPy(device.revision[0]);
         },
-        "Returns if the connected micro:bit is a V2 device",
+        "Returns the major revision of the micro:bit",
     );
 
     mod.stop_all = skulpt_function(

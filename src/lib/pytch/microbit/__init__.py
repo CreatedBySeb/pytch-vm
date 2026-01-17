@@ -3,7 +3,7 @@ import sys
 from types import ModuleType
 
 from ..syscalls import (
-    _is_microbit_v2,
+    _get_microbit_rev,
 )
 
 from .commands import (
@@ -76,7 +76,7 @@ class Device(ModuleType):
     @property
     def sound_level(self):
         """Reports the level of sound heard by the micro:bit's microphone"""
-        if not _is_microbit_v2():
+        if _get_microbit_rev() != 2:
             raise AttributeError()
 
         return self._get_int("sound")
@@ -85,6 +85,11 @@ class Device(ModuleType):
     def temperature(self):
         """Reports the temperature felt by the micro:bit in Celsius"""
         return self._get_int("temp")
+
+    @property
+    def revision(self):
+        """Reports the major revision of the micro:bit, 1 or 2"""
+        return _get_microbit_rev()
 
     def _get_int(self, name: str) -> int:
         return int(_get_var(name)[0])
