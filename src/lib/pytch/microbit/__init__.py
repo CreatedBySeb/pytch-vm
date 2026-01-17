@@ -54,7 +54,7 @@ class Device(ModuleType):
 
         # V1 only provides 2 values, so we just set the logo value to False
         if len(values) < 3:
-            values.push(False)
+            values.append(False)
 
         return Buttons(*[val == "True" for val in values])
 

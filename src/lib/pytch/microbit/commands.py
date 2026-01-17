@@ -1,4 +1,8 @@
-from ..syscalls import _microbit_send
+from ..syscalls import (
+    _get_microbit_rev,
+    _microbit_send,
+)
+
 from .validation import BRIGHTNESS, DIGITAL_VALUES, PINS, PIXELS, RangeError
 
 
@@ -58,6 +62,9 @@ def clear_display():
 def play_music(song: str, wait: bool = False, loop: bool = False):
     "(SONG) Plays SONG using the micro:bit's speaker"
 
+    if _get_microbit_rev() != 2:
+        raise SystemError("'play_music' is only supported on a V2 micro:bit")
+
     # Songs are too complex to check on our side, so we defer to the micro:bit
     if not isinstance(song, str):
         raise TypeError("song must be a string")
@@ -108,6 +115,9 @@ def show_text(text: str, wait: bool = False, loop: bool = False):
 
 def stop_music():
     "() Stops any currently playing music on the micro:bit"
+
+    if _get_microbit_rev() != 2:
+        raise SystemError("'stop_music' is only supported on a V2 micro:bit")
 
     _microbit_send("stop_music")
 
